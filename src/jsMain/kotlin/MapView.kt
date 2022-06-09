@@ -37,7 +37,7 @@ class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
                 field = value
                 aspectRatio = value.height / value.width
                 height = startHeight
-                searchRadius = height / 7
+                searchRadius = height / 8
                 width = height / aspectRatio
                 rerender()
             }
@@ -76,7 +76,7 @@ class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
     fun changeHeight(value: Double) {
         height += value
         width = height / aspectRatio
-        searchRadius = height / 7
+        searchRadius = height / 8
         rerender()
     }
 

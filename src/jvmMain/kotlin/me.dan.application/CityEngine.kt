@@ -8,7 +8,7 @@ import java.sql.SQLException
 import kotlin.math.ln
 import kotlin.math.tan
 
-class CityEngine(private var map: RoutleMap) {
+class CityEngine {
 
     private var connection : Connection? = null
 
@@ -22,12 +22,21 @@ class CityEngine(private var map: RoutleMap) {
 
     }
 
-    fun getCities(name: String) : List<City> {
+    fun getCities(map: RoutleMap, name: String) : List<City> {
         val cities = mutableListOf<City>()
 
         try {
-            val statement = connection!!.prepareStatement("SELECT AsciiName, Lat, Long FROM cities WHERE ( CC = 'GB' OR CC = 'IE' OR CC2 = 'GB' )" +
-                    "AND ( LOWER(RealName) = LOWER(?) OR LOWER(AsciiName) = LOWER(?) OR LOWER(AltNames) LIKE '%:' || ? || ':%' )")
+            var queryString = "SELECT AsciiName, Lat, Long FROM cities WHERE ("
+            for ( i in 0 until map.countryCodes.size) {
+                queryString += " CC = '${map.countryCodes[i]}' OR CC2 = '${map.countryCodes[i]}'"
+
+                if (i != map.countryCodes.size - 1) {
+                    queryString += " OR"
+                }
+            }
+            queryString += " ) AND ( LOWER(RealName) = LOWER(?) OR LOWER(AsciiName) = LOWER(?) OR LOWER(AltNames) LIKE '%:' || ? || ':%' )"
+
+            val statement = connection!!.prepareStatement(queryString)
             statement.setString(1, name)
             statement.setString(2, name)
             statement.setString(3, name)
@@ -42,10 +51,10 @@ class CityEngine(private var map: RoutleMap) {
                     ln(tan(Math.PI/4 + lat * Math.PI / 360))
                 }
 
-                val relY = (latToY(map.lat_max) - latToY(coords.getDouble(2))) /
-                        (latToY(map.lat_max) - latToY(map.lat_min))
+                val relY = (latToY(map.latMax) - latToY(coords.getDouble(2))) /
+                        (latToY(map.latMax) - latToY(map.latMin))
 
-                val relX = (coords.getDouble(3) - map.long_min) / (map.long_max - map.long_min)
+                val relX = (coords.getDouble(3) - map.longMin) / (map.longMax - map.longMin)
 
                 // If within bounds
                 if (relX >= 0 || relX <= 1 || relY >= 0 || relY <= 1 ) {
@@ -61,9 +70,19 @@ class CityEngine(private var map: RoutleMap) {
         return cities
     }
 
-    fun getRandomCity(): City {
+    fun getRandomCity(map: RoutleMap): City {
         try {
-            val statement = connection!!.prepareStatement("SELECT AsciiName, Lat, Long FROM cities WHERE ( CC = 'GB' ) ORDER BY random() LIMIT 1")
+            var queryString = "SELECT AsciiName, Lat, Long FROM cities WHERE ("
+            for ( i in 0 until map.countryCodes.size) {
+                queryString += " CC = '${map.countryCodes[i]}' OR CC2 = '${map.countryCodes[i]}'"
+
+                if (i != map.countryCodes.size - 1) {
+                    queryString += " OR"
+                }
+            }
+            queryString += " ) ORDER BY random() LIMIT 1"
+
+            val statement = connection!!.prepareStatement(queryString)
 
             // Until good random gotten
             while (true)
@@ -75,10 +94,10 @@ class CityEngine(private var map: RoutleMap) {
                     ln(tan(Math.PI/4 + lat * Math.PI / 360))
                 }
 
-                val relY = (latToY(map.lat_max) - latToY(coords.getDouble(2))) /
-                        (latToY(map.lat_max) - latToY(map.lat_min))
+                val relY = (latToY(map.latMax) - latToY(coords.getDouble(2))) /
+                        (latToY(map.latMax) - latToY(map.latMin))
 
-                val relX = (coords.getDouble(3) - map.long_min) / (map.long_max - map.long_min)
+                val relX = (coords.getDouble(3) - map.longMin) / (map.longMax - map.longMin)
 
                 // If within range
                 if (relX >= 0 || relX <= 1 || relY >= 0 || relY <= 1 ) {

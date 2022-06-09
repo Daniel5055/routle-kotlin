@@ -1,6 +1,7 @@
 package me.dan.application
 
-import City
+import RoutleMap
+import WebPage
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.html.respondHtml
@@ -12,20 +13,33 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import kotlinx.html.*
-import java.sql.DriverManager
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.json.Json
+import java.io.File
 
-fun HTML.index() {
-    head {
-        title("Routle")
-    }
-    body {
-        script(src = "/static/routle.js") {}
+
+fun createHTMLPlating(rootId: String): HTML.() -> Unit {
+    return {
+        head {
+            title("Routle")
+        }
+        body {
+            id = rootId
+            script(src = "/static/routle.js") {}
+        }
     }
 }
 
-fun main() {
+fun readJSON(fileName: String): String {
+    val inputStream = File(fileName).inputStream()
+    return inputStream.bufferedReader().use { it.readText() }
+}
 
-    val engine = CityEngine(RoutleMap.uk)
+fun main() {
+    val engine = CityEngine()
+
+    val routleMaps = Json.decodeFromString(ListSerializer(RoutleMap.serializer()), readJSON("src/jsMain/resources/routleMaps.json"))
 
     embeddedServer(Netty, port = 8080, host = "127.0.0.1") {
         // Dependency Injections
@@ -42,26 +56,83 @@ fun main() {
 
         // Basic routing
         routing {
-            get("/") {
-                call.respondHtml(HttpStatusCode.OK, HTML::index)
-            }
-
-            // Querying city names
-            route("/city") {
-                get("{name?}") {
-                    val cityName : String = (call.parameters["name"] ?: "o")
-
-                    println("A user entered $cityName")
-
-                    val cities = engine.getCities(cityName)
-                    call.respond(cities)
+            route(WebPage.index.path) {
+                get {
+                    call.respondHtml(HttpStatusCode.OK, createHTMLPlating(WebPage.index.id))
                 }
             }
 
-            // Querying a random city
-            get("/random") {
-                val city = engine.getRandomCity()
-                call.respond(city)
+            route(WebPage.singleplayerMenu.path) {
+                get {
+                    call.respondHtml(HttpStatusCode.OK, createHTMLPlating(WebPage.singleplayerMenu.id))
+                }
+
+                route("{mapName?}") {
+
+                    // For determining if map exists among the maps
+                    fun doesMapExist(mapName: String?): RoutleMap? {
+                        mapName?.let {
+                            routleMaps.forEach {
+                                if (mapName == it.name) {
+                                    return it
+                                }
+                            }
+                        }
+
+                        return null
+                    }
+
+                    get {
+                        val mapName: String? = call.parameters["mapName"]
+
+                        if (doesMapExist(mapName) != null) {
+                            call.respondHtml(HttpStatusCode.OK, createHTMLPlating(WebPage.singleplayerGame.id))
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
+
+                    get("map") {
+                        val mapName: String? = call.parameters["mapName"]
+
+                        val result = doesMapExist(mapName)
+                        if (result != null) {
+                            call.respond(result)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
+
+                    // Querying city names
+                    route("/city") {
+                        get("{name?}") {
+                            val cityName : String = (call.parameters["name"] ?: "o")
+                            val mapName: String? = call.parameters["mapName"]
+
+                            println("A user entered $cityName")
+
+                            val map = doesMapExist(mapName)
+                            if (map != null) {
+                                val cities = engine.getCities(map, cityName)
+                                call.respond(cities)
+                            } else {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                        }
+                    }
+
+                    // Querying a random city
+                    get("/random") {
+                        val mapName: String? = call.parameters["mapName"]
+                        val map = doesMapExist(mapName)
+                        if (map != null) {
+                            val city = engine.getRandomCity(map)
+                            call.respond(city)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
+                }
             }
 
             // Static resource access

@@ -60,6 +60,7 @@ kotlin {
             dependencies {
                 implementation("io.nacular.doodle:core:$doodleVersion")
                 implementation("io.nacular.doodle:browser:$doodleVersion")
+                implementation("io.nacular.doodle:controls:$doodleVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
                 implementation("io.ktor:ktor-client-js:1.6.7")
                 implementation("io.ktor:ktor-client-json:1.6.7")
