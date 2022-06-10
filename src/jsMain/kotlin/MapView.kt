@@ -12,15 +12,15 @@ import io.nacular.doodle.image.width
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
+class MapView(private var startHeight: Double, var onWin: () -> Unit) : View() {
 
     var endCityColour = Color(166u, 242u, 165u)
     var farCityColour = Color(224u, 161u, 161u)
     var pastCityColour = Color(127u, 141u, 137u)
 
     private val circleRadius = 2.0
-    private var searchRadius = 1.0
     private var aspectRatio = 0.0
+    private var searchRadius = 1.0
 
     private var farCities by renderProperty(mutableListOf<City>())
     private var pastCities by renderProperty(mutableListOf<City>())
@@ -80,6 +80,10 @@ class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
         rerender()
     }
 
+    fun setSearchRadius(value: Double) {
+        searchRadius *= value
+    }
+
     // Returns false if not city at all drawn
     fun drawCity(cities: List<City>): Boolean {
         // Iterate through cities and find the closest city not equal to current city
@@ -105,8 +109,9 @@ class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
         }
 
         if (closestCity == null) {
-            return false
+            return true
         }
+
         // if endcity within radius
         if (endCityDistance != null && endCityDistance!! <= searchRadius) {
             onWin()
@@ -125,6 +130,7 @@ class MapView(var startHeight: Double, var onWin: () -> Unit) : View() {
         else {
             farCities.add(closestCity!!)
             rerender()
+            return false
         }
 
         return true

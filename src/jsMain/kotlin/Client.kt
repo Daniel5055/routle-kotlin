@@ -25,6 +25,7 @@ fun main() {
         RoutleApp(display = instance(),
             textMetrics = instance(),
             fontsLoader = instance(),
+            focusManager = instance(),
             appView = instance(),
             webPage = webPage
         )

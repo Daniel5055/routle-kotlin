@@ -10,8 +10,9 @@ import kotlinx.coroutines.*
 import org.kodein.di.instance
 import kotlin.coroutines.CoroutineContext
 import io.nacular.doodle.application.Modules.Companion.PointerModule
+import io.nacular.doodle.focus.FocusManager
 
-class RoutleApp(val display: Display, textMetrics: TextMetrics, val fontsLoader: FontLoader, appView: ApplicationViewFactory, webPage: WebPage?)
+class RoutleApp(val display: Display, textMetrics: TextMetrics, val fontsLoader: FontLoader, focusManager: FocusManager, appView: ApplicationViewFactory, webPage: WebPage?)
     : Application, CoroutineScope {
 
     init {
@@ -28,7 +29,7 @@ class RoutleApp(val display: Display, textMetrics: TextMetrics, val fontsLoader:
             val root = appView(modules = listOf(PointerModule, ImageModule, FocusModule, KeyboardModule)) {
                 when (webPage) {
                     WebPage.singleplayerMenu -> RoutleSinglePlayerApp(display = instance(), textMetrics = instance(), theme = theme)
-                    WebPage.singleplayerGame -> RoutleSinglePlayerGameApp(display = instance(), textMetrics = instance(), focusManager = instance(), imageLoader = instance(), theme = theme)
+                    WebPage.singleplayerGame -> RoutleSinglePlayerGameApp(display = instance(), textMetrics = instance(), focusManager = focusManager, imageLoader = instance(), theme = theme)
                     else -> RoutleSinglePlayerApp(display = instance(), textMetrics = instance(), theme = theme)
                 }
             }
@@ -39,7 +40,7 @@ class RoutleApp(val display: Display, textMetrics: TextMetrics, val fontsLoader:
                 override fun layout(container: PositionableContainer) {
                     // Readjust navbar
                     navbar.width = display.width
-                    navbar.height = 60.0
+                    navbar.height = 70.0
 
                     // Root container
                     root.y = navbar.height + 10.0
@@ -56,5 +57,4 @@ class RoutleApp(val display: Display, textMetrics: TextMetrics, val fontsLoader:
 
     override val coroutineContext: CoroutineContext
         get() = Job()
-
 }

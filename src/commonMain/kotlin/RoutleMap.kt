@@ -5,4 +5,5 @@ class RoutleMap(val name: String,
                 val longMin: Double,
                 val latMax: Double,
                 val latMin: Double,
-                val countryCodes: List<String>)
+                val countryCodes: List<String>,
+                val searchRadius: Double)

@@ -1,11 +1,20 @@
 import io.nacular.doodle.application.Application
+import io.nacular.doodle.controls.form.textField
 import io.nacular.doodle.controls.text.Label
+import io.nacular.doodle.controls.text.TextField
+import io.nacular.doodle.controls.text.TextFieldBehavior
 import io.nacular.doodle.controls.theme.CommonLabelBehavior
 import io.nacular.doodle.core.Display
 import io.nacular.doodle.drawing.TextMetrics
 import io.nacular.doodle.core.*
+import io.nacular.doodle.drawing.Canvas
+import io.nacular.doodle.drawing.paint
 import io.nacular.doodle.focus.FocusManager
+import io.nacular.doodle.geometry.Point
+import io.nacular.doodle.geometry.Rectangle
+import io.nacular.doodle.geometry.Size
 import io.nacular.doodle.image.ImageLoader
+import io.nacular.doodle.theme.native.NativeTextFieldBehaviorModifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -33,18 +42,31 @@ class RoutleSinglePlayerGameApp(display: Display, textMetrics: TextMetrics, focu
         }
         display += map
 
+        val info = Label("Loading").apply {
+            foregroundColor = theme.rootForegroundColor
+            font = theme.xSmallFont
+            behavior = CommonLabelBehavior(textMetrics)
+        }
+        display += info
+
         val inputField = InputView(textMetrics, theme.rootForegroundColor) {input ->
             launch {
                 // Get the city and draw it
                 val cities = getCities(input)
                 if (cities.isNotEmpty()) {
-                    map.drawCity(cities)
+                    if (map.drawCity(cities)) {
+                        info.text = input
+                    } else {
+                        info.text = "$input is too far!"
+                    }
+                } else {
+                    info.text = "$input ?"
                 }
+                info.rerender()
             }
         }.apply {
             font = theme.mediumFont
         }
-
         display += inputField
         focusManager.requestFocus(inputField)
 
@@ -74,6 +96,8 @@ class RoutleSinglePlayerGameApp(display: Display, textMetrics: TextMetrics, focu
             spec.text = "Get from ${from.name} to ${to.name}"
             spec.rerender()
             map.currentCity = from
+            info.text = from.name
+            info.rerender()
             map.endCity = to
         }
 
@@ -84,6 +108,8 @@ class RoutleSinglePlayerGameApp(display: Display, textMetrics: TextMetrics, focu
             imageLoader.load(routleMap.path)?.let {
                 map.mapImage = it
             }
+
+            map.setSearchRadius(routleMap.searchRadius)
         }
     }
 
