@@ -60,5 +60,15 @@
       "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "AL", "AD", "BY", "BA", "XK", "LI", "MK",
       "MD", "MC", "ME", "NO", "RU", "SM", "RS", "CH", "TR", "UA", "GB", "VA"],
     "searchRadius": "0.5"
+  },
+  {
+    "name": "USA",
+    "path": "/static/usa.png",
+    "longMax": "-65.17820",
+    "longMin": "-126.46133",
+    "latMax": "49.38370",
+    "latMin": "25.13495",
+    "countryCodes": ["US"],
+    "searchRadius": "1.0"
   }
 ]

@@ -57,7 +57,7 @@ class CityEngine {
                 val relX = (coords.getDouble(3) - map.longMin) / (map.longMax - map.longMin)
 
                 // If within bounds
-                if (relX >= 0 || relX <= 1 || relY >= 0 || relY <= 1 ) {
+                if (relX in 0.0..1.0 && relY in 0.0..1.0) {
                     cities.add(City(coords.getString(1), relX, relY))
                 }
             }
@@ -100,7 +100,7 @@ class CityEngine {
                 val relX = (coords.getDouble(3) - map.longMin) / (map.longMax - map.longMin)
 
                 // If within range
-                if (relX >= 0 || relX <= 1 || relY >= 0 || relY <= 1 ) {
+                if (relX in 0.0..1.0 && relY in 0.0..1.0) {
                     return City(coords.getString(1), relX, relY)
                 }
             }
