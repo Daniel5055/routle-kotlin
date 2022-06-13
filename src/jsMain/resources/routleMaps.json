@@ -50,15 +50,66 @@
     "searchRadius": "0.9"
   },
   {
+    "name": "Iberia",
+    "path": "/static/iberia.png",
+    "longMax": "4.39106",
+    "longMin": "-9.59654",
+    "latMax": "43.9828",
+    "latMin": "35.9588",
+    "countryCodes": ["ES", "PT", "AD", "GI"],
+    "searchRadius": "1.0"
+  },
+  {
+    "name": "Indian Subcontinent",
+    "path": "/static/india.png",
+    "longMax": "97.9039",
+    "longMin": "67.1767",
+    "latMax": "35.7319",
+    "latMin": "5.2632",
+    "countryCodes": ["IN", "BD", "BT", "NP", "LK"],
+    "searchRadius": "1.0"
+  },
+  {
+    "name": "Egypt",
+    "path": "/static/egypt.png",
+    "longMax": "37.2743",
+    "longMin": "24.6224",
+    "latMax": "32.1793",
+    "latMin": "21.7099",
+    "countryCodes": ["EG"],
+    "searchRadius": "1.0"
+  },
+  {
+    "name": "Japan",
+    "path": "/static/japan.png",
+    "longMax": "150.853",
+    "longMin": "128.490",
+    "latMax": "46.3507",
+    "latMin": "30.1351",
+    "countryCodes": ["JP"],
+    "searchRadius": "1.0"
+  },
+  {
+    "name": "Australia",
+    "path": "/static/australia.png",
+    "longMax": "154.532",
+    "longMin": "112.525",
+    "latMax": "-10.0650",
+    "latMin": "-44.0693",
+    "countryCodes": ["AU"],
+    "searchRadius": "1.0"
+  },
+  {
     "name": "Europe",
-    "path": "/static/eu.png",
-    "longMax": "43.376",
-    "longMin": "-11.727",
-    "latMax": "71.265",
-    "latMin": "33.767",
+    "path": "/static/europe.png",
+    "longMax": "43.2722",
+    "longMin": "-10.8614",
+    "latMax": "71.3575",
+    "latMin": "29.9009",
     "countryCodes": ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV",
       "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "AL", "AD", "BY", "BA", "XK", "LI", "MK",
-      "MD", "MC", "ME", "NO", "RU", "SM", "RS", "CH", "TR", "UA", "GB", "VA"],
+      "MD", "MC", "ME", "NO", "RU", "SM", "RS", "CH", "TR", "UA", "GB", "VA","DZ", "TN", "MA", "LY", "EG", "GE", "SY",
+      "IL", "JO", "PS", "LB"],
     "searchRadius": "0.5"
   },
   {

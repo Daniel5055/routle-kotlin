@@ -20,12 +20,13 @@ import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class MapView(private var startHeight: Double, private val imageLoader: ImageLoader, private val appScope: CoroutineScope, private val theme: RoutleTheme) : View() {
-    private val circleRadius = 2.0
+class MapView(private var startHeight: Double, searchRadius: Double, private val imageLoader: ImageLoader, private val appScope: CoroutineScope, private val theme: RoutleTheme) : View() {
+    private var circleRadius = 1.0
     private var aspectRatio = 0.0
-    private var searchRadius = 1.0
 
-    var mapImage: Image? = null
+    var searchRadius by renderProperty(searchRadius)
+
+    private var mapImage: Image? = null
         set(value) {
             if (value != null) {
                 field = value
@@ -37,6 +38,7 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
 
                 // Set search radius
                 searchRadius *= height / 8
+                circleRadius *= height / 210
                 rerender()
             }
         }
@@ -52,6 +54,7 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
                 }
                 // Adjust search radius
                 searchRadius *= map!!.searchRadius
+                //circleRadius *= map!!.searchRadius
             }
         }
 
@@ -60,6 +63,8 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
     private var routes by renderProperty(mutableListOf<Pair<Point, Point>>())
     var currentCity by renderProperty(City.nullCity)
     var endCity by renderProperty(City.nullCity)
+
+    var cityCount = 0
 
     init {
         width = 500.0
@@ -71,9 +76,8 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
             // Draw map
             canvas.image(mapImage!!, Rectangle(Point.Origin, bounds.size))
 
-            // Draw current city and endpoint
+            // Draw current city
             canvas.circle(Circle(relToAbs(currentCity.relX, currentCity.relY), circleRadius), theme.grayColor.paint)
-            canvas.circle(Circle(relToAbs(endCity.relX, endCity.relY), circleRadius), theme.greenColor.paint)
 
             // Draw the routes, past cities, and far cities
             routes.forEach {
@@ -88,6 +92,9 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
 
             // Draw the search circle
             canvas.circle(Circle(relToAbs(currentCity.relX, currentCity.relY), searchRadius), Stroke(theme.grayColor.paint))
+
+            // Draw the end city
+            canvas.circle(Circle(relToAbs(endCity.relX, endCity.relY), circleRadius), theme.greenColor.paint)
         }
     }
 
@@ -132,6 +139,15 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
 
         // if endcity within radius
         if (endCityDistance != null && endCityDistance!! <= searchRadius) {
+            farCities.clear()
+            routes.add(Pair(Point(currentCity.relX * width, currentCity.relY * height),
+                Point(endCity.relX * width, endCity.relY * height)))
+            pastCities.add(currentCity)
+            currentCity = endCity
+            rerender()
+
+            cityCount++
+
             return Pair(endCity, Status.Win)
         }
 
@@ -143,6 +159,8 @@ class MapView(private var startHeight: Double, private val imageLoader: ImageLoa
             pastCities.add(currentCity)
             currentCity = closestCity!!
             rerender()
+
+            cityCount++
         }
         else {
             farCities.add(closestCity!!)

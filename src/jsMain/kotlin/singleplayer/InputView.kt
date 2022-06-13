@@ -20,32 +20,34 @@ class InputView(private val textMetrics: TextMetrics, private val colour: Color,
             rerender()
         }
 
-    init {
-        size = Size(500, 80)
-        keyChanged += object: KeyListener {
-            override fun pressed(event: KeyEvent) {
-                when (event.key) {
-                    Enter -> {
-                        onEnter(inputText)
-                        inputText = ""
-                    }
+    var keyListener = object: KeyListener {
+        override fun pressed(event: KeyEvent) {
+            when (event.key) {
+                Enter -> {
+                    onEnter(inputText)
+                    inputText = ""
+                }
 
-                    Backspace -> {
-                        inputText = inputText.dropLast(1)
+                Backspace -> {
+                    inputText = inputText.dropLast(1)
+                    width = textMetrics.width(inputText, font)
+                }
+
+                else -> {
+                    if (event.key.text.length == 1) {
+                        inputText += event.key.text
                         width = textMetrics.width(inputText, font)
-                    }
-
-                    else -> {
-                        if (event.key.text.length == 1) {
-                            inputText += event.key.text
-                            width = textMetrics.width(inputText, font)
-                            rerender()
-                        }
+                        rerender()
                     }
                 }
-                event.consume()
             }
+            event.consume()
         }
+    }
+
+    init {
+        size = Size(500, 80)
+        keyChanged += keyListener
     }
 
     override fun render(canvas: Canvas) {

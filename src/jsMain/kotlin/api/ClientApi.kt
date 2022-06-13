@@ -2,6 +2,7 @@ package api
 
 import io.nacular.doodle.geometry.Size
 import kotlinx.browser.window
+import org.w3c.dom.url.URLSearchParams
 
 fun getClientScreenSize(): Size {
     return Size(window.screen.width, window.screen.height)
@@ -9,4 +10,12 @@ fun getClientScreenSize(): Size {
 
 fun isMobileClient(): Boolean {
     return window.navigator.userAgent.contains("mobi")
+}
+
+fun getMapDifficulty(): Double {
+    return URLSearchParams(window.location.search).get("difficulty")?.toDouble() ?: 1.0
+}
+
+fun reloadPage() {
+    window.location.href = window.location.href
 }

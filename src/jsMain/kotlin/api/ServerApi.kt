@@ -36,8 +36,12 @@ suspend fun getMaps(): List<RoutleMap> {
 suspend fun getMap(): RoutleMap {
     return jsonClient.get("$endpoint/${window.location.pathname}/map")
 }
-fun goToSingleplayerMap(map: RoutleMap) {
-    window.location.href = "${WebPage.singleplayerGame.path}/${map.name}"
+fun goToSingleplayerMap(map: RoutleMap, difficulty: Double) {
+    if (difficulty == 1.0) {
+        window.location.href = "${WebPage.singleplayerGame.path}/${map.name}"
+    } else {
+        window.location.href = "${WebPage.singleplayerGame.path}/${map.name}?difficulty=$difficulty"
+    }
 }
 
 fun goToSingleplayerMenu() {

@@ -1,17 +1,26 @@
 package singleplayer
 
+import api.*
 import common.RoutleTheme
-import api.getCities
-import api.getMap
-import api.getRandomCity
+import common.SliderBehavior
+import common.StackedLayout
+import core.NavbarButtonBehavior
+import core.SettingsView
 import io.nacular.doodle.application.Application
+import io.nacular.doodle.controls.buttons.Button
+import io.nacular.doodle.controls.buttons.PushButton
+import io.nacular.doodle.controls.range.Slider
 import io.nacular.doodle.controls.text.Label
 import io.nacular.doodle.controls.theme.CommonLabelBehavior
 import io.nacular.doodle.core.Display
 import io.nacular.doodle.drawing.TextMetrics
 import io.nacular.doodle.core.*
+import io.nacular.doodle.event.PointerEvent
+import io.nacular.doodle.event.PointerListener
 import io.nacular.doodle.focus.FocusManager
+import io.nacular.doodle.geometry.Size
 import io.nacular.doodle.image.ImageLoader
+import io.nacular.doodle.utils.HorizontalAlignment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -24,8 +33,12 @@ class RoutleSinglePlayerGameApp(display: Display,
                                 focusManager: FocusManager,
                                 imageLoader: ImageLoader,
                                 appScope: CoroutineScope,
+                                settings: SettingsView,
                                 theme: RoutleTheme) : Application {
     init {
+
+
+
         // Specification for user
         val spec = Label("Loading").apply {
             foregroundColor = theme.rootForegroundColor
@@ -33,19 +46,15 @@ class RoutleSinglePlayerGameApp(display: Display,
             font = theme.mediumFont
         }
         display += spec
-
-        // On win
-        val winMessage = Label("You win!").apply {
+        val winMessage = Label("Number of Cities: ").apply {
             foregroundColor = theme.rootForegroundColor
-            font = theme.largeFont
+            font = theme.mediumFont
             behavior = CommonLabelBehavior(textMetrics)
         }
-        fun onWin() {
-            display.children.clear()
-            display += winMessage
-        }
+        // On win declaration
+        var onWin = {}
 
-        val map = MapView(display.height / 5 * 3, imageLoader, appScope, theme)
+        val map = MapView(display.height / 5 * 3, getMapDifficulty(), imageLoader, appScope, theme)
         // Set the RoutleMap
         appScope.launch {
             map.map = getMap()
@@ -83,9 +92,26 @@ class RoutleSinglePlayerGameApp(display: Display,
         display += inputField
         focusManager.requestFocus(inputField)
 
+        // OnWin implementation
+        onWin = {
+            display -= inputField
+            inputField.keyChanged -= inputField.keyListener
+            display += winMessage.apply { text += map.cityCount }
+            display += PushButton("Play again?").apply {
+                foregroundColor = theme.rootForegroundColor
+                font = theme.smallFont
+                size = textMetrics.size(text, font)
+                behavior = NavbarButtonBehavior()
+
+                fired += {
+                    reloadPage()
+                }
+            }
+        }
+
         display.layout = object: Layout {
             override fun layout(container: PositionableContainer) {
-                var y = 0.0
+                var y = 10.0
                 container.children.forEach { child ->
                     child.x = (container.width - child.width) / 2
                     child.y = y
@@ -116,6 +142,34 @@ class RoutleSinglePlayerGameApp(display: Display,
             spec.rerender()
             info.rerender()
         }
+
+        // Add to settings
+        val difficultySetting = object: Container() {
+            init {
+                val text = Label("Difficulty").apply {
+                    foregroundColor = theme.rootForegroundColor
+                    font = theme.smallFont
+                    behavior = CommonLabelBehavior(textMetrics)
+                }
+                children += text
+                val slider = Slider(0.25..2.0).apply {
+                    size = Size(text.width, 10.0)
+                    foregroundColor = theme.rootForegroundColor
+                    behavior = SliderBehavior()
+                    value = 1.125
+
+                    changed += {_,old,new  ->
+                        map.searchRadius /= 1 / old
+                        map.searchRadius *= 1 / new
+                    }
+                }
+                children += slider
+                layout = StackedLayout(HorizontalAlignment.Left)
+                width = text.width
+                height = text.height + slider.height + 5.0
+            }
+        }
+        settings.addSetting(difficultySetting)
     }
 
     override fun shutdown() {
