@@ -1,6 +1,8 @@
 package api
 
+import io.nacular.doodle.drawing.Color
 import io.nacular.doodle.geometry.Size
+import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.url.URLSearchParams
 
@@ -18,4 +20,9 @@ fun getMapDifficulty(): Double {
 
 fun reloadPage() {
     window.location.href = window.location.href
+}
+
+fun setBackgroundColour(color: Color) {
+    println(color.hexString)
+    document.bgColor = "#${color.hexString}"
 }

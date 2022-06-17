@@ -5,7 +5,7 @@ import io.nacular.doodle.controls.theme.CommonButtonBehavior
 import io.nacular.doodle.drawing.*
 import io.nacular.doodle.geometry.Point
 
-class NavbarButtonBehavior() : CommonButtonBehavior<Button>() {
+class NavbarButtonBehavior : CommonButtonBehavior<Button>() {
 
     override fun render(view: Button, canvas: Canvas) {
         // Render changes on button state change

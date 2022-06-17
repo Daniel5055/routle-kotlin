@@ -9,10 +9,8 @@ import io.nacular.doodle.core.*
 import io.nacular.doodle.drawing.*
 import io.nacular.doodle.geometry.Point
 
-class NavbarView(textMetrics: TextMetrics, theme: RoutleTheme) : Container() {
+class NavbarView(textMetrics: TextMetrics, val theme: RoutleTheme) : Container() {
     init {
-        backgroundColor = theme.navbarBackgroundColor
-        foregroundColor = theme.navbarForegroundColor
 
         val title = Label("Routle").apply {
             foregroundColor = theme.navbarForegroundColor
@@ -48,8 +46,8 @@ class NavbarView(textMetrics: TextMetrics, theme: RoutleTheme) : Container() {
     }
 
     override fun render(canvas: Canvas) {
-        canvas.rect(bounds.atOrigin, backgroundColor!!.paint)
-        canvas.line(Point(0.0, height), Point(width, height), Stroke(foregroundColor!!.paint, 2.0))
+        canvas.rect(bounds.atOrigin, theme.navbarBackgroundColor.paint)
+        canvas.line(Point(0.0, height), Point(width, height), Stroke(theme.navbarForegroundColor.paint, 2.0))
     }
 }
 

@@ -19,8 +19,6 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 
 fun main() {
-    document.bgColor = "#202427"
-
     var webPage: WebPage? = null
     if (document.getElementById(WebPage.index.id) != null) {
         webPage = WebPage.index

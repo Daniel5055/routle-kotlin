@@ -1,8 +1,10 @@
 package core
 
 import api.getClientScreenSize
-import common.DarkRoutleTheme
 import WebPage
+import common.RoutleTheme
+import common.SliderBehavior
+import common.StackedLayout
 import io.nacular.doodle.animation.Animation
 import io.nacular.doodle.animation.Animator
 import io.nacular.doodle.animation.NoneUnit
@@ -20,12 +22,16 @@ import kotlinx.coroutines.*
 import org.kodein.di.instance
 import io.nacular.doodle.application.Modules.Companion.PointerModule
 import io.nacular.doodle.controls.Photo
+import io.nacular.doodle.controls.range.Slider
+import io.nacular.doodle.controls.text.Label
+import io.nacular.doodle.controls.theme.CommonLabelBehavior
 import io.nacular.doodle.event.PointerEvent
 import io.nacular.doodle.event.PointerListener
 import io.nacular.doodle.focus.FocusManager
 import io.nacular.doodle.geometry.Point
 import io.nacular.doodle.geometry.Size
 import io.nacular.doodle.image.ImageLoader
+import io.nacular.doodle.utils.HorizontalAlignment
 import io.nacular.doodle.utils.observable
 import io.nacular.measured.units.Angle.Companion.degrees
 import io.nacular.measured.units.Angle.Companion.radians
@@ -48,16 +54,11 @@ class RoutleApp(display: Display,
                 webPage: WebPage?)
     : Application {
 
-    private var animation: Animation? by observable(null) { old, _ ->
-        old?.cancel()
-    }
-
-    private var progress: Float = 0.0f
     init {
         appScope.launch {
 
             // Load theme
-            val theme = DarkRoutleTheme(fontsLoader, getClientScreenSize().height)
+            val theme = RoutleTheme(fontsLoader, getClientScreenSize().height).also { it.dark() }
 
             // Navbar
             val navbar = NavbarView(textMetrics, theme)
@@ -68,6 +69,43 @@ class RoutleApp(display: Display,
             appScope.launch {
                 imageLoader.load("/static/settings.png")?.let { image ->
                     settings.image = image
+                }
+            }
+
+            val themeSetting = object: Container() {
+                init {
+                    val text = Label("Theme (Beta)").apply {
+                        foregroundColor = theme.rootForegroundColor
+                        font = theme.smallFont
+                        behavior = CommonLabelBehavior(textMetrics)
+                    }
+                    children += text
+                    val slider = Slider(0..1).apply {
+                        size = Size(text.width, 10.0)
+                        foregroundColor = theme.rootForegroundColor
+                        behavior = SliderBehavior()
+                        value = 0
+
+                        changed += {_,_,new ->
+                            if (new == 0) {
+                                appScope.launch {
+                                    theme.dark()
+                                }
+                            }
+                            else {
+                                appScope.launch {
+                                    theme.light()
+                                }
+                            }
+                            display.children.forEach {
+                                it.rerender()
+                            }
+                        }
+                    }
+                    children += slider
+                    layout = StackedLayout(HorizontalAlignment.Left)
+                    width = text.width
+                    height = text.height + slider.height + 5.0
                 }
             }
 
@@ -123,7 +161,7 @@ class RoutleApp(display: Display,
                     root.x = (display.width - root.width) / 2
 
                     settings.x = display.width - settings.width - 30.0
-                    settings.y = display.height - settings.width - 30.0
+                    settings.y = display.height - settings.height - 30.0
                 }
             }
         }
